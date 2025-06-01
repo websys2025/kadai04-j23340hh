@@ -6,8 +6,12 @@
     </head>
     <body>
         <h1 id="vending-machine">自動販売機システム</h1>
+        <p id="wallet">所持金: 1000円</p> <!-- 所持金表示用の要素 -->
         <table id="item_area" border="1"></table>
         <script>
+            // 所持金の初期値を設定
+            let wallet = 1000;
+
             // 商品一覧を記録する連想配列の配列
             const items =  [
                 { id: 1, name: "緑茶", price: 140, stock: 5 },
@@ -43,15 +47,27 @@
                 // 商品購入の関数
                 buyItem() {          
                     if (this.stock >= 1) { 
-                        console.log("商品番号: "+this.id+", 商品名: "+this.name+"を購入します。");
-                        this.stock--;
-                        console.log("残りは" + this.stock + "個です。");
-                        document.getElementById("stock" + this.id).innerHTML = this.stock;
+                        if (wallet >= this.price) { // 所持金が価格以上か確認
+                            wallet -= this.price; // 所持金から価格を引く
+                            console.log("商品番号: " + this.id + ", 商品名: " + this.name + "を購入します。");
+                            console.log(this.name + "を購入しました。残金は" + wallet + "円です。");
+                            this.stock--; // 在庫を減らす
+                            console.log("残りは" + this.stock + "個です。");
+                            document.getElementById("stock" + this.id).innerHTML = this.stock; // 在庫表示を更新
+                            updateWalletDisplay(); // 所持金表示を更新
+                        } else {
+                            console.log("所持金が不足しています。");
+                        }
                     } else {
-                        console.log(this.name+"は商品の在庫がないため購入できません。");
+                        console.log(this.name + "は商品の在庫がないため購入できません。");
                     }
                 }
             } // End of Item class
+
+            // 所持金表示を更新する関数
+            function updateWalletDisplay() {
+                document.getElementById("wallet").innerHTML = "所持金: " + wallet + "円";
+            }
 
             // 商品テーブルのエレメント抽出
             const itemArea = document.getElementById("item_area");
@@ -61,27 +77,28 @@
             const item_list = new Array(items.length);
             const btn = new Array(items.length);
 
-            // 課題4-1. ここにコード書く // 商品オブジェクトの生成
+            // 課題4-1: 商品オブジェクトの生成
             for (let i = 0; i < items.length; i++) {
                 item_list[i] = new Item(items[i].name, items[i].price, items[i].stock);
                 console.log("id: " + item_list[i].id + ", name: " + item_list[i].name + ", " + item_list[i].price + "円, 残り" + item_list[i].stock + "個");
             }
 
-            // 課題4-2. ここにコードを書く // 商品表の作成
+            // 課題4-2: 商品表の作成
             for (let i = 0; i < item_list.length; i++) {
                 let item = item_list[i];
                 itemArea.innerHTML += "<tr><td>" + item.name + "</td><td>" + item.price + "</td><td id='stock" + item.id + "'>" + item.stock + "</td><td><button id='button" + item.id + "'>購入</button></td></tr>";
             }
 
-            // クリックイベント時の購入処理の設定
+            // 課題4-3: クリックイベント時の購入処理の設定
             for (let i = 0; i < item_list.length; i++) {
-                // 課題4-3. ここにコードを書く
                 document.getElementById("button" + item_list[i].id).onclick = () => {
                     item_list[i].buyItem();
                 }
             }
             Item.showItemList(item_list);
 
+            // 初期所持金表示を更新
+            updateWalletDisplay();
         </script>
     </body>
 </html>
